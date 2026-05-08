@@ -1,8 +1,13 @@
 <template>
-  <div style="display: flex; height: 100%; width: 100%">
+  <div class="mine-page">
     <div class="options-box">
-      <div>
+      <div class="account-title">
+        <iconify-icon icon="solar:user-id-bold"></iconify-icon>
         <span>账号设置</span>
+      </div>
+      <div class="account-note">
+        <strong>资料别乱写。</strong>
+        <span>系统会记住你。</span>
       </div>
     </div>
     <div class="main-box">
@@ -58,7 +63,7 @@
           <span>{{ userInfo?.data?.data?.mail }}</span>
         </el-descriptions-item>
       </el-descriptions>
-      <el-button style="position: absolute;left: 35px; top: 250px; " type="primary" @click="dialogVisible = !dialogVisible">修改个人信息</el-button>
+      <el-button class="edit-profile" type="primary" @click="dialogVisible = !dialogVisible">修改个人信息</el-button>
     </div>
   </div>
   <!-- 修改信息 -->
@@ -140,6 +145,9 @@ const { proxy } = getCurrentInstance()
 const API = proxy.$API
 const userInfo = ref()
 const userInfoForm = ref() // 修改信息
+const size = ref('default')
+const iconStyle = { color: '#9b5b31' }
+const isLogin = ref(false)
 const getUserInfo = async () => {
   const username = getUsername()
   userInfo.value = await API.user.queryUserInfo(username)
@@ -149,6 +157,9 @@ const getUserInfo = async () => {
 getUserInfo()
 // 修改信息
 const dialogVisible = ref(false)
+const handleClose = () => {
+  dialogVisible.value = false
+}
 const formRule = reactive({
   phone: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
@@ -172,7 +183,7 @@ const formRule = reactive({
     { required: false, message: '请输入密码', trigger: 'blur' },
     { min: 8, max: 15, message: '密码长度请在八位以上', trigger: 'blur' }
   ],
-  realNamee: [{ required: true, message: '请输姓名', trigger: 'blur' }]
+  realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }]
 })
 const changeUserInfo = (formEl) => {
   if (!formEl) return
@@ -195,20 +206,33 @@ const changeUserInfo = (formEl) => {
 </script>
 
 <style lang="scss" scoped>
+.mine-page {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  color: #281b12;
+}
+
 .main-box {
   position: relative;
   flex: 1;
-  padding: 15px;
-  background-color: rgb(238, 240, 245);
-  height: calc(100vh - 50px);
+  min-width: 0;
+  margin-left: 18px;
+  padding: 20px;
+  background:
+    linear-gradient(145deg, rgba(255, 248, 236, 0.96), rgba(235, 207, 165, 0.9)),
+    radial-gradient(circle at 88% 8%, rgba(190, 95, 53, 0.18), transparent 32%);
+  border: 1px solid rgba(255, 224, 180, 0.34);
+  box-shadow: 18px 20px 0 rgba(0, 0, 0, 0.14);
   display: flex;
   flex-direction: column;
 }
 
 .content-box {
   flex: 1;
-  background-color: #ffffff;
-  padding: 20px;
+  padding: 22px;
+  background: rgba(255, 252, 243, 0.62);
+  border: 1px solid rgba(61, 42, 27, 0.16);
 }
 
 .register {
@@ -217,6 +241,13 @@ const changeUserInfo = (formEl) => {
 
 :deep(.el-descriptions__label) {
   width: 200px !important;
+  color: #4d3524;
+  background: #f4e6ce !important;
+}
+
+:deep(.el-descriptions__content) {
+  color: #281b12;
+  background: rgba(255, 252, 243, 0.7) !important;
 }
 
 .second-font {
@@ -226,26 +257,88 @@ const changeUserInfo = (formEl) => {
 .options-box {
   position: relative;
   height: 100%;
-  width: 190px;
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  width: 224px;
+  padding: 22px 18px;
+  color: #fff4df;
+  border: 1px solid rgba(255, 224, 180, 0.18);
+  background:
+    linear-gradient(180deg, rgba(31, 28, 18, 0.9), rgba(45, 33, 23, 0.86)),
+    radial-gradient(circle at 28% 0%, rgba(190, 95, 53, 0.24), transparent 34%);
+  box-shadow: 12px 14px 0 rgba(0, 0, 0, 0.18);
+}
+
+.account-title {
   display: flex;
-  padding-top: 15px;
-  div {
-    flex: 1;
-    display: flex;
-    height: 50px;
-    align-items: center;
-    // justify-content: center;
-    padding-left: 15px;
-    background-color: rgb(235, 239, 250);
-    font-family:
-      PingFangSC-Semibold,
-      PingFang SC;
-    color: #3464e0;
-    font-weight: 600;
+  align-items: center;
+  gap: 10px;
+  color: #fff4df;
+  font-size: 17px;
+  font-weight: 800;
+
+  iconify-icon {
+    color: #f1b24a;
+    font-size: 25px;
   }
 }
+
+.account-note {
+  display: grid;
+  gap: 6px;
+  margin-top: 42px;
+  padding: 16px;
+  color: #271b13;
+  background: #f1b24a;
+  transform: rotate(-2deg);
+
+  strong {
+    font-size: 18px;
+  }
+
+  span {
+    font-size: 13px;
+  }
+}
+
+.edit-profile {
+  position: absolute;
+  left: 42px;
+  top: 260px;
+  height: 42px;
+  min-width: 128px;
+  border-radius: 0;
+  border: 0;
+  color: #fff7ea;
+  background: #be5f35;
+  box-shadow: 7px 7px 0 #2d2117;
+  transition:
+    transform 420ms cubic-bezier(.19, 1, .22, 1),
+    box-shadow 420ms cubic-bezier(.19, 1, .22, 1);
+}
+
+.edit-profile:hover {
+  background: #a94e28;
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0 #2d2117;
+}
+
 :deep(.el-descriptions__body) {
   width: 500px;
+}
+
+@media (max-width: 900px) {
+  .mine-page {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .options-box {
+    width: 100%;
+  }
+
+  .main-box {
+    margin-left: 0;
+    margin-top: 16px;
+    min-height: 480px;
+  }
 }
 </style>

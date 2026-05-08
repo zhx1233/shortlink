@@ -32,5 +32,11 @@ build/
 ### VS Code ###
 .vscode/
 
+### Codex local workspace ###
+.codex/
+findings.md
+progress.md
+task_plan.md
+
 ### Mac OS ###
 .DS_Store

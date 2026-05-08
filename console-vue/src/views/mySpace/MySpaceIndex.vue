@@ -1,12 +1,12 @@
 <template>
-  <div style="display: flex; height: 100%">
+  <div class="space-page">
     <div class="options-box">
       <div class="option-title flex-box">
         <div>
           短链分组<span> 共{{ editableTabs?.length }}组</span>
         </div>
-        <div class="hover-box" style="width: 24px" @click="showAddGroup">
-          <img src="@/assets/svg/添加.svg" alt="" />
+        <div class="add-group hover-box" @click="showAddGroup">
+          <iconify-icon icon="solar:add-circle-bold"></iconify-icon>
         </div>
       </div>
       <!-- 拖动选项 -->
@@ -15,7 +15,7 @@
           <div class="item-box flex-box hover-box" :class="{ selectedItem: selectedIndex === index }"
             @click="changeSelectIndex(index)">
             <div style="display: flex">
-              <img src="@/assets/svg/移动竖.svg" width="13" style="margin-right: 3px" alt="" />
+              <iconify-icon class="drag-icon" icon="solar:hamburger-menu-bold"></iconify-icon>
               <span class="over-text">{{ item.name }}</span>
             </div>
             <div class="flex-box">
@@ -51,9 +51,7 @@
         <!-- 当selectIndex等于-1时代表选中的是回收站 -->
         <div class="recycle-box hover-box" :class="{ selectedItem: selectedIndex === -1 }" @click="recycleBin">
           回收站
-          <el-icon style="margin-left: 5px; font-size: 20px">
-            <Delete />
-          </el-icon>
+          <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
         </div>
       </div>
     </div>
@@ -62,11 +60,18 @@
       <div class="table-box">
         <!-- 默认展示创建短链输入框和按钮 -->
         <div v-if="!isRecycleBin" class="buttons-box">
-          <div style="width: 100%; display: flex">
+          <div class="toolbar-main">
+            <div class="toolbar-copy">
+              <span>{{ editableTabs?.[selectedIndex]?.name || '默认分组' }}</span>
+              <strong>今天别让链接裸奔。</strong>
+            </div>
             <!-- <el-input style="flex: 1; margin-right: 20px" placeholder="请输入http://或https://开头的连接或引用跳转程序"></el-input> -->
-            <el-button class="addButton" type="primary" style="width: 130px; margin-right: 10px"
-              @click="isAddSmallLink = true">创建短链</el-button>
-            <el-button style="width: 130px; margin-right: 10px" @click="isAddSmallLinks = true">批量创建</el-button>
+            <div class="toolbar-actions">
+              <el-button class="addButton" type="primary" @click="isAddSmallLink = true">
+                创建短链
+              </el-button>
+              <el-button @click="isAddSmallLinks = true">批量创建</el-button>
+            </div>
           </div>
         </div>
         <!-- 展示回收站信息 -->
@@ -75,8 +80,8 @@
           <span>共{{ recycleBinNums }}条短链接</span>
         </div>
         <!-- 表格展示区域 -->
-        <el-table :data="tableData" height="calc(100vh - 240px)" style="width: calc(100vw - 230px)"
-          :header-cell-style="{ background: '#f7f8fa', color: '#606266' }">
+        <el-table :data="tableData" height="calc(100vh - 282px)" class="link-table"
+          :header-cell-style="{ background: '#f4e6ce', color: '#4d3524' }">
           <!-- 数据为空时展示的内容 -->
           <template #empty>
             <div style="height: 60vh; display: flex; align-items: center; justify-content: center">
@@ -813,32 +818,54 @@ const removeLink = (data) => {
 </script>
 
 <style lang="scss" scoped>
+.space-page {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  color: #281b12;
+}
+
 .flex-box {
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 12px;
   justify-content: space-between;
 }
 
 .hover-box:hover {
   cursor: pointer;
-  color: rgba(40, 145, 206, 0.6);
-  background-color: #f7f7f7;
-  box-shadow: 0px 2px 8px 0px rgba(28, 41, 90, 0.1);
+  color: #be5f35;
+  background-color: rgba(241, 178, 74, 0.16);
+  box-shadow: 5px 5px 0 rgba(45, 33, 23, 0.08);
 }
 
 .option-title {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 56px;
+  height: 70px;
   font-size: 15px;
-  font-weight: 600;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-weight: 800;
+  color: #fff4df;
+  border-bottom: 1px solid rgba(255, 224, 180, 0.18);
 
   span {
+    margin-left: 4px;
+    color: rgba(255, 244, 223, 0.56);
     font-size: 12px;
     font-weight: 400;
+  }
+}
+
+.add-group {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #f1b24a;
+
+  iconify-icon {
+    font-size: 23px;
   }
 }
 
@@ -847,16 +874,21 @@ const removeLink = (data) => {
   flex-direction: column;
   position: relative;
   height: 100%;
-  width: 190px;
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  width: 224px;
+  border: 1px solid rgba(255, 224, 180, 0.18);
+  background:
+    linear-gradient(180deg, rgba(31, 28, 18, 0.9), rgba(45, 33, 23, 0.86)),
+    radial-gradient(circle at 28% 0%, rgba(190, 95, 53, 0.24), transparent 34%);
+  box-shadow: 12px 14px 0 rgba(0, 0, 0, 0.18);
 
   .item-box {
-    height: 43px;
-    width: 190px;
-    font-family:
-      PingFangSC-Semibold,
-      PingFang SC;
-    font-weight: 520;
+    height: 46px;
+    width: 100%;
+    color: rgba(255, 244, 223, 0.72);
+    font-weight: 700;
+    transition:
+      transform 360ms cubic-bezier(.19, 1, .22, 1),
+      background-color 360ms cubic-bezier(.19, 1, .22, 1);
   }
 
   .item-box:hover {
@@ -872,6 +904,12 @@ const removeLink = (data) => {
   }
 }
 
+.drag-icon {
+  margin-right: 7px;
+  color: rgba(255, 224, 180, 0.46);
+  font-size: 16px;
+}
+
 .recycle-bin {
   position: absolute;
   display: flex;
@@ -882,26 +920,32 @@ const removeLink = (data) => {
 
 .recycle-box {
   flex: 1;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(255, 224, 180, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 7px;
+  color: rgba(255, 244, 223, 0.7);
+
+  iconify-icon {
+    font-size: 18px;
+  }
 }
 
 .edit {
   display: none;
   margin-left: 5px;
-  color: rgb(83, 97, 97);
+  color: #f1b24a;
   font-size: 20px;
 }
 
 .edit:hover {
-  color: #2991ce;
+  color: #fff4df;
   cursor: pointer;
 }
 
 .zero {
-  color: rgb(83, 97, 97) !important;
+  color: rgba(255, 244, 223, 0.44) !important;
 }
 
 // 提示框样式
@@ -924,28 +968,29 @@ const removeLink = (data) => {
 }
 
 .selectedItem {
-  color: #3464e0 !important;
-  background-color: #ebeffa !important;
+  color: #26170d !important;
+  background-color: #f1b24a !important;
   font-weight: 600 !important;
+  transform: translateX(6px);
 }
 
 .block:hover {
-  color: rgb(121, 187, 255);
+  color: #be5f35;
 
   .el-icon {
-    color: rgb(121, 187, 255) !important;
+    color: #be5f35 !important;
   }
 }
 
 .table-edit {
   font-size: 20px;
   margin-right: 20px;
-  color: #3677c2;
+  color: #9b5b31;
   cursor: pointer;
 }
 
 .table-edit:hover {
-  color: #98cafe;
+  color: #be5f35;
 }
 
 .qr-code {
@@ -959,24 +1004,28 @@ const removeLink = (data) => {
 
 .content-box {
   flex: 1;
-  padding: 16px;
-  background-color: #eef0f5;
+  min-width: 0;
+  margin-left: 18px;
+  background: rgba(255, 246, 229, 0.66);
   position: relative;
+  border: 1px solid rgba(255, 224, 180, 0.34);
+  box-shadow: 18px 20px 0 rgba(0, 0, 0, 0.14);
 
   .table-box {
-    background-color: #ffffff;
+    background:
+      linear-gradient(145deg, rgba(255, 248, 236, 0.96), rgba(235, 207, 165, 0.9)),
+      radial-gradient(circle at 88% 8%, rgba(190, 95, 53, 0.18), transparent 32%);
     height: 100%;
+    overflow: hidden;
 
     .buttons-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(61, 42, 27, 0.16);
     }
 
     .pagination-block {
       position: absolute;
-      bottom: 4%;
+      bottom: 18px;
       left: 50%;
       transform: translate(-50%, 0);
     }
@@ -986,12 +1035,87 @@ const removeLink = (data) => {
       display: flex;
       align-items: center;
       padding-left: 16px;
+      color: #4d3524;
 
       span:nth-child(1) {
         font-size: 20px;
         margin-right: 5px;
       }
     }
+  }
+}
+
+.toolbar-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.toolbar-copy {
+  display: grid;
+  gap: 4px;
+
+  span {
+    color: #ad5c31;
+    font-size: 13px;
+  }
+
+  strong {
+    color: #20140c;
+    font-size: 20px;
+    line-height: 1.2;
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+
+  :deep(.el-button) {
+    min-width: 118px;
+    height: 42px;
+    border-radius: 0;
+    border: 1px solid rgba(45, 33, 23, 0.28);
+    color: #2d2117;
+    background: rgba(255, 252, 243, 0.58);
+    transition:
+      transform 420ms cubic-bezier(.19, 1, .22, 1),
+      box-shadow 420ms cubic-bezier(.19, 1, .22, 1);
+  }
+
+  :deep(.el-button--primary) {
+    border: 0;
+    color: #fff7ea;
+    background: #be5f35;
+    box-shadow: 7px 7px 0 #2d2117;
+  }
+
+  :deep(.el-button:hover) {
+    transform: translate(2px, 2px);
+    box-shadow: 3px 3px 0 rgba(45, 33, 23, 0.72);
+  }
+}
+
+.link-table {
+  width: 100%;
+  color: #352417;
+  background: transparent;
+
+  :deep(.el-table__inner-wrapper::before) {
+    display: none;
+  }
+
+  :deep(th.el-table__cell) {
+    border-bottom: 1px solid rgba(61, 42, 27, 0.16);
+  }
+
+  :deep(td.el-table__cell) {
+    border-bottom: 1px solid rgba(61, 42, 27, 0.1);
+  }
+
+  :deep(.el-table__row:hover > td.el-table__cell) {
+    background: rgba(241, 178, 74, 0.12);
   }
 }
 
@@ -1080,7 +1204,7 @@ const removeLink = (data) => {
     display: -webkit-box; //作为弹性伸缩盒子模型显示。
     -webkit-box-orient: vertical; //设置伸缩盒子的子元素排列方式--从上到下垂直排列
     -webkit-line-clamp: 1; //显示的行
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(53, 36, 23, 0.56);
   }
 }
 
@@ -1097,7 +1221,7 @@ const removeLink = (data) => {
 
     span:nth-child(1) {
       font-weight: 400;
-      color: rgba(0, 0, 0, 0.4);
+      color: rgba(53, 36, 23, 0.54);
     }
   }
 
@@ -1110,7 +1234,7 @@ const removeLink = (data) => {
 
     span:nth-child(1) {
       font-weight: 400;
-      color: rgba(0, 0, 0, 0.4);
+      color: rgba(53, 36, 23, 0.54);
     }
   }
 }
@@ -1134,14 +1258,46 @@ const removeLink = (data) => {
 }
 
 .orderIndex {
-  color: #3677c2;
+  color: #be5f35;
 }
 
 .sortOptions {
-  height: calc(100% - 50px);
+  height: calc(100% - 120px);
   margin-bottom: 50px;
   // height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+:deep(.el-link.el-link--primary) {
+  color: #9b5b31;
+}
+
+:deep(.el-pagination) {
+  --el-pagination-button-bg-color: rgba(255, 252, 243, 0.68);
+  --el-pagination-hover-color: #be5f35;
+}
+
+@media (max-width: 900px) {
+  .space-page {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .options-box {
+    width: 100%;
+    min-height: 190px;
+  }
+
+  .content-box {
+    margin-left: 0;
+    margin-top: 16px;
+    min-height: 560px;
+  }
+
+  .toolbar-main {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 </style>
