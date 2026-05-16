@@ -41,7 +41,10 @@ import static com.nageoffer.shortlink.project.common.constant.RedisKeyConstant.S
 
 /**
  * Redis Stream 消息队列配置
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
+ */
+/**
+ * Redis Stream 消息队列配置。单线程消费、批量拉取（batchSize=10）、
+ * 3 秒轮询超时。消费者组模式下支持 ACK 确认，启动时从 lastConsumed 位置开始读取。
  */
 @Configuration
 @RequiredArgsConstructor

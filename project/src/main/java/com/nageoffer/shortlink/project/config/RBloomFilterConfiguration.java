@@ -24,7 +24,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 布隆过滤器配置
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
+ */
+/**
+ * 布隆过滤器配置——创建短链接判重用。基于 Redisson RBloomFilter，Redis 持久化存储。
+ * tryInit 参数：预期插入量 1 亿，误判率 0.1%。若 Redis 中已存在则复用，不存在则新建。
  */
 @Configuration
 public class RBloomFilterConfiguration {

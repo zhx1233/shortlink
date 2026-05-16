@@ -28,7 +28,10 @@ import java.util.List;
 
 /**
  * 初始化限流配置
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
+ */
+/**
+ * Sentinel 限流规则初始化——对短链接创建接口做 QPS 限流。
+ * 当前为演示配置，生产环境应推至 Sentinel Dashboard 或 Nacos 配置中心做动态规则管理。
  */
 @Component
 public class SentinelRuleConfig implements InitializingBean {

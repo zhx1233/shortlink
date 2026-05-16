@@ -26,7 +26,13 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 消息队列幂等处理器
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
+ */
+/**
+ * 消息队列幂等处理器——基于 Redis SETNX 的两阶段判定。
+ *
+ * 第一阶段：SETNX key "0"（消费中），成功则获得处理权，失败则进入第二阶段。
+ * 第二阶段：GET key，值为 "1" 说明已完成直接跳过，值为 "0" 说明上次中断等待重试。
+ * 业务处理成功后 SET key "1" 标记完成。key 2 分钟过期，宕机后 key 过期 + Stream 重投自动恢复。
  */
 @Component
 @RequiredArgsConstructor
@@ -41,6 +47,10 @@ public class MessageQueueIdempotentHandler {
      *
      * @param messageId 消息唯一标识
      * @return 消息是否消费过
+     */
+    /**
+     * 尝试获得消息处理权。SETNX key "0" 2 分钟过期，
+     * 成功返回 false（可处理），失败返回 true（已被处理或处理中）。
      */
     public boolean isMessageBeingConsumed(String messageId) {
         String key = IDEMPOTENT_KEY_PREFIX + messageId;

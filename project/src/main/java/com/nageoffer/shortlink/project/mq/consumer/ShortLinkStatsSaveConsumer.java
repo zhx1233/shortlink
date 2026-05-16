@@ -69,7 +69,12 @@ import static com.nageoffer.shortlink.project.common.constant.ShortLinkConstant.
 
 /**
  * 短链接监控状态保存消息队列消费者
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
+ */
+/**
+ * 短链接统计消息消费者。监听 Redis Stream，异步将跳转统计数据写入多张监控表。
+ *
+ * 处理流程：幂等判断 → 反序列化 → 加读锁（防改 gid 冲突）→ 查路由表拿当前 gid →
+ * 写入 8 张统计表 + 更新主表累计数 → 释放锁 → 从 Stream 删除消息。
  */
 @Slf4j
 @Component
@@ -93,6 +98,10 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
 
+    /**
+     * Redis Stream 消息回调。幂等检查通过后反序列化 DTO，
+     * 调用 actualSaveShortLinkStats 执行实际的统计落库。
+     */
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
         String stream = message.getStream();
@@ -118,6 +127,11 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
         messageQueueIdempotentHandler.setAccomplish(id.toString());
     }
 
+    /**
+     * 将一条访问统计记录写入全部监控表。在读写锁的读锁保护下执行，
+     * 先查路由表获取当前 gid，避免迁移期间 gid 过期。
+     * 所有聚合表使用 ON DUPLICATE KEY UPDATE 实现原子累加。
+     */
     public void actualSaveShortLinkStats(ShortLinkStatsRecordDTO statsRecord) {
         String fullShortUrl = statsRecord.getFullShortUrl();
         RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(LOCK_GID_UPDATE_KEY, fullShortUrl));
