@@ -9,9 +9,7 @@ spring:
           filters:
             - name: TokenValidate
               args:
-                whitePathList:
-                  - /api/short-link/admin/v1/user/login
-                  - /api/short-link/admin/v1/user/has-username
+                whitePathList: /api/short-link/admin/v1/user/login,/api/short-link/admin/v1/user/has-username
 
         - id: short-link-project
           uri: lb://short-link-project/api/short-link/**

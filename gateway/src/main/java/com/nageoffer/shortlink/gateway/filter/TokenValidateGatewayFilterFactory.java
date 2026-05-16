@@ -33,6 +33,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -40,7 +41,15 @@ import java.util.Objects;
 
 /**
  * SpringCloud Gateway Token 拦截器
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
+ */
+/**
+ * Spring Cloud Gateway Token 鉴权过滤器。
+ *
+ * 白名单路径直接放行，其他请求需从 Redis Hash 中验证 username + token。
+ * 验证通过后将 userId 和 realName 注入请求头透传下游，
+ * 下游服务无需再依赖 Redis 独立鉴权。
+ *
+ * 使用前需覆写 shortcutFieldOrder() 让 shortcut 写法正确映射到 whitePathList 字段。
  */
 @Component
 public class TokenValidateGatewayFilterFactory extends AbstractGatewayFilterFactory<Config> {
@@ -53,18 +62,24 @@ public class TokenValidateGatewayFilterFactory extends AbstractGatewayFilterFact
     }
 
     @Override
+    public List<String> shortcutFieldOrder() {
+        return List.of("whitePathList");
+    }
+
+    @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
             String requestPath = request.getPath().toString();
             String requestMethod = request.getMethod().name();
             if (!isPathInWhiteList(requestPath, requestMethod, config.getWhitePathList())) {
-                String username = request.getHeaders().getFirst("username");
+                String username = decodeHeader(request.getHeaders().getFirst("username"));
                 String token = request.getHeaders().getFirst("token");
                 Object userInfo;
                 if (StringUtils.hasText(username) && StringUtils.hasText(token) && (userInfo = stringRedisTemplate.opsForHash().get("short-link:login:" + username, token)) != null) {
                     JSONObject userInfoJsonObject = JSON.parseObject(userInfo.toString());
                     ServerHttpRequest.Builder builder = exchange.getRequest().mutate().headers(httpHeaders -> {
+                        httpHeaders.set("username", URLEncoder.encode(username, StandardCharsets.UTF_8));
                         httpHeaders.set("userId", userInfoJsonObject.getString("id"));
                         httpHeaders.set("realName", URLEncoder.encode(userInfoJsonObject.getString("realName"), StandardCharsets.UTF_8));
                     });
@@ -85,7 +100,16 @@ public class TokenValidateGatewayFilterFactory extends AbstractGatewayFilterFact
         };
     }
 
+    /**
+     * 白名单判定：① 路径以配置的白名单列表任一值开头（startsWith 匹配）；
+     * ② 硬编码 POST /api/short-link/admin/v1/user 注册接口（路径不以白名单列表中的值开头，
+     * 但注册时用户还没有 Token，必须放行）。
+     */
     private boolean isPathInWhiteList(String requestPath, String requestMethod, List<String> whitePathList) {
         return (!CollectionUtils.isEmpty(whitePathList) && whitePathList.stream().anyMatch(requestPath::startsWith)) || (Objects.equals(requestPath, "/api/short-link/admin/v1/user") && Objects.equals(requestMethod, "POST"));
+    }
+
+    private String decodeHeader(String value) {
+        return !StringUtils.hasText(value) ? value : URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

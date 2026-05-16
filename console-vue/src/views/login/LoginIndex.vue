@@ -278,7 +278,7 @@ const addUser = (formEl) => {
       loading.value = true
       try {
         const res1 = await API.user.hasUsername({ username: addForm.username })
-        if (res1?.data?.code === '0' && res1?.data?.data) {
+        if (res1?.data?.code === '0' && !res1?.data?.data) {
           ElMessage.warning('用户名已存在！')
           return
         }

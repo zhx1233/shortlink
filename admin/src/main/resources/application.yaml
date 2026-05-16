@@ -7,6 +7,12 @@ spring:
   datasource:
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
     url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
+    hikari:                       # ⬅️ 新增这段
+      register-mbeans: true       # 开启 JMX 监控
+      # 可选的常用连接池配置（根据你的需要调整）
+      maximum-pool-size: 20       # 最大连接数，默认10
+      minimum-idle: 5             # 最小空闲连接
+      connection-timeout: 30000   # 连接超时（毫秒）
   data:
     redis:
       host: 127.0.0.1
@@ -21,6 +27,6 @@ short-link:
   group:
     max-num: 20
   flow-limit:
-    enable: true
+    enable: false
     time-window: 1
     max-access-count: 20

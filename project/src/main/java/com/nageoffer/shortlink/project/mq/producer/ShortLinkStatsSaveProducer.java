@@ -28,7 +28,10 @@ import static com.nageoffer.shortlink.project.common.constant.RedisKeyConstant.S
 
 /**
  * 短链接监控状态保存消息队列生产者
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
+ */
+/**
+ * 统计消息生产者——跳转完成后将 ShortLinkStatsRecordDTO 序列化后发送到 Redis Stream。
+ * 发送操作仅一次 XADD，不阻塞跳转 302 响应。
  */
 @Component
 @RequiredArgsConstructor

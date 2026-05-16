@@ -40,11 +40,15 @@ import java.util.Optional;
 
 /**
  * 全局异常处理器
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
  */
 @Component("globalExceptionHandlerByAdmin")
 @Slf4j
 @RestControllerAdvice
+/**
+ * 全局异常处理器。统一封装 ClientException（用户端错误）、ServiceException（服务端错误）、
+ * RemoteException（远程调用错误）三类业务异常及未知异常的兜底响应，
+ * 保证所有接口返回格式为 Result<T> 统一结构体。
+ */
 public class GlobalExceptionHandler {
 
     /**

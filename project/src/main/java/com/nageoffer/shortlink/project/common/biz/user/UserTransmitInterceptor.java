@@ -24,19 +24,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 /**
  * 用户信息传输拦截器
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
  */
 @Component
+/**
+ * 用户信息透传拦截器（project 端）。从请求头中解析 Gateway 或 admin Feign 注入的
+ * username、userId、realName，存入 TransmittableThreadLocal。
+ */
 public class UserTransmitInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Object handler) throws Exception {
-        String username = request.getHeader("username");
+        String username = decodeHeader(request.getHeader("username"));
         if (StrUtil.isNotBlank(username)) {
             String userId = request.getHeader("userId");
-            String realName = request.getHeader("realName");
+            String realName = decodeHeader(request.getHeader("realName"));
             UserInfoDTO userInfoDTO = new UserInfoDTO(userId, username, realName);
             UserContext.setUser(userInfoDTO);
         }
@@ -46,5 +52,9 @@ public class UserTransmitInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(@Nullable HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Object handler, Exception exception) throws Exception {
         UserContext.removeUser();
+    }
+
+    private String decodeHeader(String value) {
+        return StrUtil.isBlank(value) ? value : URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

@@ -26,21 +26,28 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 /**
  * 用户信息传输过滤器
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
  */
 @RequiredArgsConstructor
+/**
+ * 用户信息透传过滤器——从 Gateway 注入的请求头中读取 username、userId、realName，
+ * 解码后存入 TransmittableThreadLocal。使用 TTL 而非普通 ThreadLocal 是为了在
+ * OpenFeign 线程池中自动传递上下文。
+ */
 public class UserTransmitFilter implements Filter {
 
     @SneakyThrows
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-        String username = httpServletRequest.getHeader("username");
+        String username = decodeHeader(httpServletRequest.getHeader("username"));
         if (StrUtil.isNotBlank(username)) {
             String userId = httpServletRequest.getHeader("userId");
-            String realName = httpServletRequest.getHeader("realName");
+            String realName = decodeHeader(httpServletRequest.getHeader("realName"));
             UserInfoDTO userInfoDTO = new UserInfoDTO(userId, username, realName);
             UserContext.setUser(userInfoDTO);
         }
@@ -49,5 +56,9 @@ public class UserTransmitFilter implements Filter {
         } finally {
             UserContext.removeUser();
         }
+    }
+
+    private String decodeHeader(String value) {
+        return StrUtil.isBlank(value) ? value : URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }
